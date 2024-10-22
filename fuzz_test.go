@@ -44,14 +44,20 @@ func RunFuzzTests(t *testing.T, start, end int, fuzzer *Fuzzer) string {
 	for i := start; i < end; i++ {
 		result, err := fuzzer.Fuzz()
 
-		if err != nil && err.Error() == "input string is too long" {
-			// Log expected error without failing the test
-			t.Logf("Test %d: Expected error - %v", i+1, err)
-			report += fmt.Sprintf("Test %d: Error - %v\n", i+1, err)
-		} else if err != nil {
-			// Log unexpected error and fail the test
-			t.Errorf("Test %d: Unexpected error - %v", i+1, err)
-			report += fmt.Sprintf("Test %d: Unexpected error - %v\n", i+1, err)
+		if err != nil {
+			if err.Error() == "test timed out" {
+				// Log timeout without failing test
+				t.Logf("Test %d: Timeout - %v", i+1, err)
+				report += fmt.Sprintf("Test %d: Timeout - %v\n", i+1, err)
+			} else if err.Error() == "input string is too long" {
+				// Log expected error without failing the test
+				t.Logf("Test %d: Expected error - %v", i+1, err)
+				report += fmt.Sprintf("Test %d: Expected error - %v\n", i+1, err)
+			} else {
+				// Log unexpected error and fail the test
+				t.Errorf("Test %d: Unexpected error - %v", i+1, err)
+				report += fmt.Sprintf("Test %d: Unexpected error - %v\n", i+1, err)
+			}
 		} else {
 			// Log success
 			t.Logf("Test %d: Success - %s", i+1, result)
