@@ -1,11 +1,11 @@
 Fuzz Test Report:
-Test 1: Error - input string is too long
+Test 1: Success - Processed: 8tAbNQUYDJ
 Test 2: Error - input string is too long
 Test 3: Error - input string is too long
-Test 4: Success - Processed: 33HemG6IHc
-Test 5: Success - Processed: BZl
-Test 6: Success - Processed: B1NVbAM
-Test 7: Success - Processed: hUYtjxNG
-Test 8: Success - Processed: Aa
-Test 9: Error - input string is too long
-Test 10: Error - input string is too long
+Test 4: Error - input string is too long
+Test 5: Error - input string is too long
+Test 6: Success - Processed: D9rDzaDvc
+Test 7: Success - Processed: uv
+Test 8: Error - input string is too long
+Test 9: Success - Processed: STq
+Test 10: Success - Processed: 8q
