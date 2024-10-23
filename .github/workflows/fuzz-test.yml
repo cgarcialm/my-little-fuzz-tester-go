@@ -17,44 +17,45 @@ on:
   pull_request:
     branches:
       - main
-  
+    
   # Allows manual triggering of the workflow
   workflow_dispatch: 
 
 jobs:
-  # Fuzz test job with 2 runners
+  # Fuzz test job with matrix strategy
   test-fuzz:  
     strategy:
       matrix:
         range:
-          - {start: 0, end: 5} # First range for the first runner
-          - {start: 5, end: 10} # Second range for the second runner
-    runs-on: ubuntu-latest # Each matrix run gets its own runner
+          - {start: 0, end: 5}   # First range for the first runner
+          - {start: 5, end: 10}  # Second range for the second runner
+    runs-on: ubuntu-latest        # Each matrix run gets its own runner
 
     steps:
-    # Step 1: Check out the code from the repository
-    - name: Checkout code
-      uses: actions/checkout@v4  
+      # Step 1: Check out the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v4  
+    
+      # Step 2: Build the Docker runtime image
+      - name: Build Docker runtime image
+        run: docker build --target runtime -t my-go-runtime .
 
-    # Step 2: Set up Go environment
-    - name: Set up Go
-      uses: actions/setup-go@v4  
-      with:
-        go-version: '1.23.2'
+      # Step 3: Run the fuzz tests inside the Docker container
+      - name: Run fuzz tests for range ${{ matrix.range.start }}-${{ matrix.range.end }}
+        run: |
+          mkdir -p outputs
+          docker run --rm \
+            -v ${{ github.workspace }}/outputs:/app/outputs \
+            my-go-runtime \
+            go test -v -run '^TestFuzzer$' -args -start=${{ matrix.range.start }} -end=${{ matrix.range.end }} > /app/outputs/report-${{ matrix.range.start }}-to-${{ matrix.range.end }}.txt
 
-    # Step 3: Run the fuzz tests and store the report inside 'reports/'
-    - name: Run tests for range ${{ matrix.range.start }}-${{ matrix.range.end }}
-      run: |
-        mkdir -p reports  # Ensure the reports directory exists
-        go test -v -run '^TestFuzzer$' -args -start=${{ matrix.range.start }} -end=${{ matrix.range.end }} > reports/report-${{ matrix.range.start }}-to-${{ matrix.range.end }}.txt
-
-    # Step 4: Upload the report as an artifact
-    - name: Upload Fuzz Test Report
-      if: always()  # Ensure this step runs even if tests fail
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-report-${{ matrix.range.start }}-to-${{ matrix.range.end }}
-        path: reports/report-${{ matrix.range.start }}-to-${{ matrix.range.end }}.txt
+      # Step 4: Upload the fuzz test report as an artifact
+      - name: Upload Fuzz Test Report
+        if: always()  # Ensure this step runs even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-${{ matrix.range.start }}-to-${{ matrix.range.end }}
+          path: outputs/report-${{ matrix.range.start }}-to-${{ matrix.range.end }}.txt
 
   # Separate job for the fixed input test
   test-fixed-input:
@@ -64,28 +65,29 @@ jobs:
       # Step 1: Check out the code from the repository
       - name: Checkout code
         uses: actions/checkout@v4
+    
+      # Step 2: Build the Docker runtime image
+      - name: Build Docker runtime image
+        run: docker build --target runtime -t my-go-runtime .
 
-      # Step 2: Set up the Go environment
-      - name: Set up Go
-        uses: actions/setup-go@v4  
-        with:
-          go-version: '1.23.2'
-
-      # Step 3: Run the 'TestFixedInput' and save the output in 'reports/'
-      - name: Run TestFixedInput
+      # Step 3: Run the fixed input test inside the Docker container
+      - name: Run Fixed Input Test
         run: |
-          mkdir -p reports  # Ensure 'reports/' directory exists
-          # Run the fixed input test and save the output to a report file
-          go test -v -run '^TestFixedInput$' > reports/fixed_input_report.txt
+          mkdir -p outputs
+          docker run --rm \
+            -v ${{ github.workspace }}/outputs:/app/outputs \
+            my-go-runtime \
+            go test -v -run '^TestFixedInput$' > /app/outputs/fixed_input_report.txt
 
-      # Step 4: Upload the report for the fixed input test as an artifact
+      # Step 4: Upload the fixed input test report as an artifact
       - name: Upload Fixed Input Test Report
         if: always()  
         uses: actions/upload-artifact@v4
         with:
           name: fixed-input-test-report
-          path: reports/fixed_input_report.txt
+          path: outputs/fixed_input_report.txt
     
+  # Aggregate reports job
   aggregate:
     needs: [test-fuzz, test-fixed-input]  # Wait for both jobs to complete
     runs-on: ubuntu-latest
@@ -100,13 +102,13 @@ jobs:
       # Step 2: Move all report files from subdirectories into 'reports'
       - name: Move report files
         run: |
-            find ./reports -type f -name '*.txt' -exec mv {} ./reports/ \;
+          find ./reports -type f -name '*.txt' -exec mv {} ./reports/ \;
 
       # Step 3: Aggregate all reports into one file
       - name: Aggregate reports
         run: |
-            cat ./reports/*.txt > aggregated_report.txt
-            echo "Aggregated report generated."
+          cat ./reports/*.txt > aggregated_report.txt
+          echo "Aggregated report generated."
 
       # Step 4: Upload the aggregated report
       - name: Upload aggregated report
