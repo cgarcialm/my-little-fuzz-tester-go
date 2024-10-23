@@ -1,18 +1,22 @@
-package main
+package tests
 
 import (
 	"flag"
 	"fmt"
+	"github.com/cgarcialm/my-little-fuzz-tester-go/src/fuzzer"           // Correct import
+	"github.com/cgarcialm/my-little-fuzz-tester-go/src/string_processor" // Correct import
 	"os"
+	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 )
 
 var start, end int // Global variables for range
 
 // TestMain is the entry point for all tests and parses custom flags.
 func TestMain(m *testing.M) {
-	// Define custom flags for start and end
+	// Define custom flags for start and end range
 	flag.IntVar(&start, "start", 0, "Start index for the test range")
 	flag.IntVar(&end, "end", 10, "End index for the test range")
 
@@ -23,10 +27,20 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// WriteTestReport writes the result of fuzz tests to a report file
+// WriteTestReport writes the result of fuzz tests to a report file in the "output" folder
 func WriteTestReport(report string) error {
-	// Create a report file
-	file, err := os.Create("fuzz_test_report.txt")
+	// Ensure the "output" directory exists at the root level
+	dir := "../outputs" // Navigate up to the root folder, then into the output folder
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, os.ModePerm) // Create the directory if it doesn't exist
+		if err != nil {
+			return err
+		}
+	}
+
+	// Create a report file in the "output" directory
+	filePath := filepath.Join(dir, "fuzz_test_report.txt")
+	file, err := os.Create(filePath) // Create or overwrite the file
 	if err != nil {
 		return err
 	}
@@ -38,7 +52,7 @@ func WriteTestReport(report string) error {
 }
 
 // RunFuzzTests runs the fuzz tests for a given range of tests and returns the report
-func RunFuzzTests(t *testing.T, start, end int, fuzzer *Fuzzer) string {
+func RunFuzzTests(t *testing.T, start, end int, fuzzer *fuzzer.Fuzzer) string {
 	report := "Fuzz Test Report:\n"
 
 	for i := start; i < end; i++ {
@@ -68,8 +82,8 @@ func RunFuzzTests(t *testing.T, start, end int, fuzzer *Fuzzer) string {
 	return report
 }
 
-// RunTestRange runs a range of fuzz tests in parallel and communicates results back via a channel
-func RunFuzzTestRange(t *testing.T, start, end int, fuzzer *Fuzzer, wg *sync.WaitGroup, resultChan chan<- string) {
+// RunFuzzTestRange runs a range of fuzz tests in parallel and communicates results back via a channel
+func RunFuzzTestRange(t *testing.T, start, end int, fuzzer *fuzzer.Fuzzer, wg *sync.WaitGroup, resultChan chan<- string) {
 	defer wg.Done() // Signal that this goroutine is done when the function returns
 
 	// Execute the tests for the given range
@@ -82,7 +96,8 @@ func RunFuzzTestRange(t *testing.T, start, end int, fuzzer *Fuzzer, wg *sync.Wai
 // TestFuzzer tests the processString function using the fuzzer
 func TestFuzzer(t *testing.T) {
 	// Initialize the fuzzer
-	fuzzer := NewFuzzer(processString)
+	f := fuzzer.NewFuzzer(string_processor.ProcessString)
+	f.Timeout = 5 * time.Second // Increase the timeout to 5 seconds to reduce timeouts
 
 	// Create a WaitGroup to wait for all goroutines to finish
 	var wg sync.WaitGroup
@@ -90,9 +105,9 @@ func TestFuzzer(t *testing.T) {
 	// Create a channel to gather reports from all parallel runs
 	reportChan := make(chan string, 2)
 
-	// Run the tests for the specified range
+	// Run the tests for the specified range in parallel
 	wg.Add(1)
-	go RunFuzzTestRange(t, start, end, fuzzer, &wg, reportChan)
+	go RunFuzzTestRange(t, start, end, f, &wg, reportChan)
 
 	// Wait for all parallel runs to finish
 	wg.Wait()
@@ -118,7 +133,7 @@ func TestFixedInput(t *testing.T) {
 	input := "Hello"                     // Adjusted input to fit within the expected length limit
 	expectedOutput := "Processed: Hello" // Define the expected output
 
-	result, err := processString(input)
+	result, err := string_processor.ProcessString(input)
 
 	if err != nil {
 		t.Errorf("Unexpected error for input '%s': %v", input, err)

@@ -1,4 +1,4 @@
-package main
+package string_processor
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 )
 
 // processString processes the input string and returns an error if the string is too long
-func processString(input string) (string, error) {
+func ProcessString(input string) (string, error) {
 	// simulate varying times of function
 	delay := rand.Intn(6) // Random delay between 0 and 5 seconds
 	time.Sleep(time.Duration(delay) * time.Second)

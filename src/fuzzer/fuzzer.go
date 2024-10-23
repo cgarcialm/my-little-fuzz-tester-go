@@ -1,4 +1,4 @@
-package main
+package fuzzer
 
 import (
 	"errors"
@@ -10,14 +10,14 @@ import (
 // Fuzzer struct that holds a function to be fuzzed and a timeout
 type Fuzzer struct {
 	testFunction func(string) (string, error) // The function to be fuzzed
-	timeout      time.Duration                // Timeout duration for each test
+	Timeout      time.Duration                // Timeout duration for each test
 }
 
 // NewFuzzer creates a new fuzzer instance with a timeout
 func NewFuzzer(testFunction func(string) (string, error)) *Fuzzer {
 	return &Fuzzer{
 		testFunction: testFunction,
-		timeout:      3 * time.Second, // 3-second timeout
+		Timeout:      3 * time.Second, // 3-second timeout
 	}
 }
 
@@ -55,8 +55,8 @@ func (f *Fuzzer) Fuzz() (string, error) {
 	case err := <-errorChan:
 		fmt.Printf("Error with input '%s': %v\n", input, err)
 		return "", err
-	case <-time.After(f.timeout):
-		fmt.Printf("Test timed out after %v seconds for input: %s\n", f.timeout.Seconds(), input)
+	case <-time.After(f.Timeout):
+		fmt.Printf("Test timed out after %v seconds for input: %s\n", f.Timeout.Seconds(), input)
 		return "", errors.New("test timed out")
 	}
 }
