@@ -17,7 +17,7 @@ type Fuzzer struct {
 func NewFuzzer(testFunction func(string) (string, error)) *Fuzzer {
 	return &Fuzzer{
 		testFunction: testFunction,
-		Timeout:      3 * time.Second, // 3-second timeout
+		Timeout:      6 * time.Second, // 6-second timeout
 	}
 }
 

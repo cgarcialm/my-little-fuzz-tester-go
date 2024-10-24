@@ -3,25 +3,44 @@ package tests
 import (
 	"flag"
 	"fmt"
-	"github.com/cgarcialm/my-little-fuzz-tester-go/src/fuzzer"           // Correct import
-	"github.com/cgarcialm/my-little-fuzz-tester-go/src/string_processor" // Correct import
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/cgarcialm/my-little-fuzz-tester-go/src/fuzzer"           // Correct import
+	"github.com/cgarcialm/my-little-fuzz-tester-go/src/string_processor" // Correct import
 )
 
 var start, end int // Global variables for range
 
-// TestMain is the entry point for all tests and parses custom flags.
 func TestMain(m *testing.M) {
-	// Define custom flags for start and end range
-	flag.IntVar(&start, "start", 0, "Start index for the test range")
-	flag.IntVar(&end, "end", 10, "End index for the test range")
+	var err error
 
-	// Parse the flags
-	flag.Parse()
+	// Get start and end from environment variables
+	startEnv := os.Getenv("START")
+	if startEnv != "" {
+		start, err = strconv.Atoi(startEnv)
+		if err != nil {
+			fmt.Printf("Invalid START value: %v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		start = 0
+	}
+
+	endEnv := os.Getenv("END")
+	if endEnv != "" {
+		end, err = strconv.Atoi(endEnv)
+		if err != nil {
+			fmt.Printf("Invalid END value: %v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		end = 10
+	}
 
 	// Run the tests
 	os.Exit(m.Run())
@@ -30,7 +49,7 @@ func TestMain(m *testing.M) {
 // WriteTestReport writes the result of fuzz tests to a report file in the "output" folder
 func WriteTestReport(report string) error {
 	// Ensure the "output" directory exists at the root level
-	dir := "../outputs" // Navigate up to the root folder, then into the output folder
+	dir := "../output" // Navigate up to the root folder, then into the output folder
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		err = os.MkdirAll(dir, os.ModePerm) // Create the directory if it doesn't exist
 		if err != nil {

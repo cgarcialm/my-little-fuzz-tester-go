@@ -1,0 +1,44 @@
+# docker-compose.yml
+
+services:
+  test_orchestrator:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.test_orchestrator
+    environment:
+      - NUM_TEST_GROUPS=3
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - test_network
+
+  tpm_emulator_0:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.tpm_emulator
+    volumes:
+      - ./logs/tpm_emulator_0:/app/logs
+    networks:
+      - test_network
+
+  tpm_emulator_1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.tpm_emulator
+    volumes:
+      - ./logs/tpm_emulator_1:/app/logs
+    networks:
+      - test_network
+
+  tpm_emulator_2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.tpm_emulator
+    volumes:
+      - ./logs/tpm_emulator_2:/app/logs
+    networks:
+      - test_network
+
+networks:
+  test_network:
+    driver: bridge

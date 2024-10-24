@@ -1,0 +1,29 @@
+# Use the official Go image
+FROM golang:1.23.2
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy go.mod and go.sum files
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy the entire project into the container
+COPY src/ ./src
+
+# Build the Test Orchestrator
+RUN go build -o test_orchestrator ./src/test_orchestrator/test_orchestrator.go
+
+# Set the entrypoint to run the Test Orchestrator
+CMD ["./test_orchestrator"]
+
+# # ... previous steps ...
+
+# # Set environment variables
+# ENV START=0
+# ENV END=10
+
+# # Run the tests
+# CMD ["go", "test", "./tests", "-v"]

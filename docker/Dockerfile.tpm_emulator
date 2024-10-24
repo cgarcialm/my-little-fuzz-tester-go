@@ -1,0 +1,6 @@
+# docker/Dockerfile.tpm_emulator
+
+FROM ubuntu:20.04
+
+# ... rest of your Dockerfile instructions ...
+
