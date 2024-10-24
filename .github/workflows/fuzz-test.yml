@@ -40,9 +40,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install docker-compose -y
 
+      # Run Docker Compose with the existing docker-compose.yml
       - name: Build and Run Docker Compose
         run: |
-          docker-compose -f docker-compose.generated.yml up --abort-on-container-exit
+          docker-compose -f docker-compose.yml up --abort-on-container-exit
 
       - name: Upload Test Reports
         uses: actions/upload-artifact@v3

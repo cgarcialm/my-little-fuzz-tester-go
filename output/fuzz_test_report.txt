@@ -1,11 +1,11 @@
 Fuzz Test Report:
 Test 1: Expected error - input string is too long
-Test 2: Timeout - test timed out
-Test 3: Timeout - test timed out
-Test 4: Timeout - test timed out
-Test 5: Success - Processed: lKPI
+Test 2: Success - Processed: Hh
+Test 3: Success - Processed: swfHi
+Test 4: Expected error - input string is too long
+Test 5: Expected error - input string is too long
 Test 6: Expected error - input string is too long
 Test 7: Expected error - input string is too long
 Test 8: Timeout - test timed out
-Test 9: Success - Processed: DB0moewYtx
+Test 9: Success - Processed: oyo58Q
 Test 10: Expected error - input string is too long
