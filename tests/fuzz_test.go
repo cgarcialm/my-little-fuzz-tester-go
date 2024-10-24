@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
