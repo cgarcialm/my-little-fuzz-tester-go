@@ -42,9 +42,6 @@ jobs:
 
       - name: Build and Run Docker Compose
         run: |
-          cd docker
-          python generate_docker_compose.py
-          cd ..
           docker-compose -f docker-compose.generated.yml up --abort-on-container-exit
 
       - name: Upload Test Reports
@@ -58,5 +55,3 @@ jobs:
         with:
           name: logs
           path: logs/
-
-          
