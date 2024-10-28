@@ -1,0 +1,11 @@
+// Provides schema for new tests
+
+syntax = "proto3"; // most widely used syntax
+
+package testSchema; // package name to avoid naming conflicts if you have multiple protobuf
+
+message TestInput {
+  string test_name = 1;
+  int32 bytes_requested = 2;
+}
+
