@@ -23,6 +23,9 @@ WORKDIR /app
 # Copy the Go project into the container
 COPY . .
 
+# Generate Go code from .proto files automatically
+RUN protoc --go_out=. Test-Suite/testSchema.proto
+
 # Download and verify dependencies
 RUN go mod tidy
 
