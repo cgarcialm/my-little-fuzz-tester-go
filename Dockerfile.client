@@ -1,0 +1,14 @@
+# Use an Ubuntu base image
+FROM ubuntu:20.04
+
+# Set environment to avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies for TPM2 tools and networking tools
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    tpm2-tools iputils-ping && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Default to running bash for interactive use
+ENTRYPOINT ["/bin/bash"]
