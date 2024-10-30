@@ -3,30 +3,29 @@ package main
 import (
 	"fmt"
 	"log"
-
-	"github.com/google/go-tpm/tpm2"
-	"github.com/google/go-tpm/tpm2/transport/simulator"
+	"os/exec"
 )
 
+func runCommand(name string, args ...string) {
+	// Execute the given command with arguments
+	cmd := exec.Command(name, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Command %s failed: %v\nOutput: %s", name, err, string(output))
+	}
+	fmt.Printf("Command %s output:\n%s\n", name, string(output))
+}
+
 func main() {
-	// Open the TPM simulator
-	tpm, err := simulator.OpenSimulator()
-	if err != nil {
-		log.Fatalf("Could not connect to TPM simulator: %v", err)
-	}
-	defer tpm.Close()
+	// Step 1: Initialize the TPM
+	fmt.Println("Initializing the TPM...")
+	runCommand("tpm2_startup", "-T", "mssim:host=tpm-simulator,port=2321", "-c")
 
-	// Request 16 random bytes from the TPM
-	grc := tpm2.GetRandom{
-		BytesRequested: 16,
-	}
+	// Step 2: Request 16 random bytes from the TPM
+	fmt.Println("Requesting 16 random bytes...")
+	runCommand("tpm2_getrandom", "16", "-T", "mssim:host=tpm-simulator,port=2321")
 
-	// Execute the command and retrieve the bytes
-	randomBytes, err := grc.Execute(tpm)
-	if err != nil {
-		log.Fatalf("GetRandom failed: %v", err)
-	}
-
-	// Print the random bytes as a hex string
-	fmt.Printf("Random Bytes: %x\n", randomBytes)
+	// Step 3: Finalize the TPM session by shutting it down
+	fmt.Println("Finalizing the TPM...")
+	runCommand("tpm2_shutdown", "-T", "mssim:host=tpm-simulator,port=2321", "-c")
 }
