@@ -1,14 +1,25 @@
-# Use an Ubuntu base image
-FROM ubuntu:20.04
+FROM golang:1.20
 
-# Set environment to avoid interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
+# Set the working directory
+WORKDIR /app
 
-# Install dependencies for TPM2 tools and networking tools
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    tpm2-tools iputils-ping && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Copy only the go.mod and go.sum to leverage Docker caching
+COPY go.mod go.sum ./
 
-# Default to running bash for interactive use
-ENTRYPOINT ["/bin/bash"]
+# Temporarily remove the toolchain directive inside the container
+RUN sed -i '/toolchain/d' go.mod
+
+# Download dependencies inside the container
+RUN go mod download
+
+# Copy the rest of the source code
+COPY main.go ./
+
+# Build the Go binary
+RUN go build -o go-tpm-client main.go
+
+# Install TPM2 tools for communication with the simulator
+RUN apt-get update && apt-get install -y tpm2-tools
+
+# Set the entrypoint to run the Go binary
+ENTRYPOINT ["./go-tpm-client"]
