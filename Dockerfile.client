@@ -1,25 +1,25 @@
-FROM golang:1.20
+# Use an official Golang image
+FROM golang:1.23-alpine
+
+# Install dependencies: OpenSSL, git, and any needed build tools
+RUN apk add --no-cache openssl-dev gcc musl-dev
+
+# Set environment variables for CGO and OpenSSL
+ENV CGO_ENABLED=1
+ENV CGO_CFLAGS="-I/usr/include"
+ENV CGO_LDFLAGS="-L/usr/lib"
 
 # Set the working directory
 WORKDIR /app
 
-# Copy only the go.mod and go.sum to leverage Docker caching
-COPY go.mod go.sum ./
+# Copy the Go project into the container
+COPY . .
 
-# Temporarily remove the toolchain directive inside the container
-RUN sed -i '/toolchain/d' go.mod
+# Download and verify dependencies
+RUN go mod tidy
 
-# Download dependencies inside the container
-RUN go mod download
+# Expose the TPM simulator port (optional if you're running the simulator inside the container)
+EXPOSE 2321
 
-# Copy the rest of the source code
-COPY main.go ./
-
-# Build the Go binary
-RUN go build -o go-tpm-client main.go
-
-# Install TPM2 tools for communication with the simulator
-RUN apt-get update && apt-get install -y tpm2-tools
-
-# Set the entrypoint to run the Go binary
-ENTRYPOINT ["./go-tpm-client"]
+# Run the Go program by default
+CMD ["go", "run", "main.go"]
