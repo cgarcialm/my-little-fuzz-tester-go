@@ -1,0 +1,27 @@
+FROM ubuntu:20.04
+
+# Set environment variables to avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=America/Los_Angeles
+
+# Install required dependencies for the build
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    tzdata build-essential autoconf-archive pkg-config \
+    automake gcc libssl-dev git ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Clone the TPM Simulator repository with submodules
+RUN git clone --recurse-submodules https://github.com/TrustedComputingGroup/TPM.git /tpm
+
+# Set the working directory to where the bootstrap script is located
+WORKDIR /tpm/TPMCmd
+
+# Run the build process: bootstrap, configure, and make
+RUN ./bootstrap && ./configure && make
+
+# Expose the port for the simulator (default: 2321)
+EXPOSE 2321
+
+# Run the TPM simulator when the container starts
+ENTRYPOINT ["./Simulator/src/tpm2-simulator"]
