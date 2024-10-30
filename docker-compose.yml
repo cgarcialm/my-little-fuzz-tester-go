@@ -23,7 +23,7 @@ services:
       - tpm-simulator
     networks:
       - tpm-network
-    entrypoint: ["sh", "-c", "sleep 2 && ./go-tpm-client"]
+    command: ["./go-tpm-client"] 
 
 networks:
   tpm-network:
