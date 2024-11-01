@@ -17,7 +17,7 @@ RUN git clone --recurse-submodules https://github.com/TrustedComputingGroup/TPM.
 # Set the working directory to where the bootstrap script is located
 WORKDIR /tpm/TPMCmd
 
-# Run the build process: bootstrap, configure, and make
+# Run the build process: bootstrap, configure, and make 
 RUN ./bootstrap && ./configure && make
 
 # Expose the port for the simulator (default: 2321)
