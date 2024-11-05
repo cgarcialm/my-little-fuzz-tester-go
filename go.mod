@@ -16,3 +16,4 @@ require (
     // Low-level system calls needed by TPM libraries (indirect)
     golang.org/x/sys v0.15.0 // indirect
 )
+replace github.com/google/go-tpm => ./internal/github.com/google/go-tpm
