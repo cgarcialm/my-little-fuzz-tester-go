@@ -18,6 +18,11 @@ COPY . .
 # Download and verify dependencies
 RUN go mod tidy
 
+# Install Protocol Buffer compiler
+RUN curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protoc-21.12-linux-x86_64.zip && \
+    unzip protoc-21.12-linux-x86_64.zip -d /usr/local && \
+    rm protoc-21.12-linux-x86_64.zip
+
 # Expose the TPM simulator port (optional if you're running the simulator inside the container)
 EXPOSE 2321
 
