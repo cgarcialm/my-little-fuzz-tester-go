@@ -83,6 +83,19 @@ With Docker, everything the program needs is **packaged into a container**, ensu
    Random Bytes: eaf5afde6fccabcd1234567890abcdef
    ```
 
+### **How to run the test files (Unit tests)**
+
+**Run the tests:**
+   ```bash
+   go test
+   ```
+
+If all tests pass, the output will look like this:
+   ```bash
+   PASS
+   ok  	my-little-fuzz-tester-go	0.123s   
+   ```
+
 ## **Contributing**
 Contributions are welcome! If you find a bug or have an idea for an improvement, feel free to open an issue or submit a pull request.
 
