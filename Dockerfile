@@ -9,22 +9,11 @@ ENV CGO_ENABLED=1
 ENV CGO_CFLAGS="-I/usr/include"
 ENV CGO_LDFLAGS="-L/usr/lib"
 
-# Install the Protocol Buffer compiler (protoc)
-RUN curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protoc-21.12-linux-x86_64.zip && \
-    unzip protoc-21.12-linux-x86_64.zip -d /usr/local && \
-    rm protoc-21.12-linux-x86_64.zip
-
-# Install the Go protobuf plugin
-RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-
 # Set the working directory
 WORKDIR /app
 
 # Copy the Go project into the container
 COPY . .
-
-# Generate Go code from .proto files automatically
-RUN protoc --go_out=. Test-Suite/testSchema.proto
 
 # Download and verify dependencies
 RUN go mod tidy
