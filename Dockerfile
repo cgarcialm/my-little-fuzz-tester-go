@@ -2,7 +2,7 @@
 FROM golang:1.23-alpine
 
 # Install dependencies: OpenSSL, git, and any needed build tools
-RUN apk add --no-cache openssl-dev gcc musl-dev
+RUN apk add --no-cache openssl-dev gcc musl-dev curl unzip
 
 # Set environment variables for CGO and OpenSSL
 ENV CGO_ENABLED=1
