@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  tpm-simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile.simulator
+    container_name: tpm-simulator
+    ports:
+      - "2321:2321"
+      - "2322:2322"
+    networks:
+      - tpm-network
+    entrypoint: []
+    command: ["./Simulator/src/tpm2-simulator", "2321"]
+
+  go-tpm-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: go-tpm-client
+    depends_on:
+      - tpm-simulator
+    networks:
+      - tpm-network
+    command: ["./go-tpm-client"] 
+
+networks:
+  tpm-network:
+    driver: bridge
