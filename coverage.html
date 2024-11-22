@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>my-little-fuzz-tester-go: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go (0.0%)</option>
+				
+				<option value="file1">github.com/cgarcialm/my-little-fuzz-tester-go/main.go (0.0%)</option>
+				
+				<option value="file2">github.com/cgarcialm/my-little-fuzz-tester-go/string_processor.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "errors"
+        "fmt"
+        "math/rand"
+        "time"
+)
+
+// Fuzzer struct that holds a function to be fuzzed and a timeout
+type Fuzzer struct {
+        testFunction func(string) (string, error) // The function to be fuzzed
+        timeout      time.Duration                // Timeout duration for each test
+}
+
+// NewFuzzer creates a new fuzzer instance with a timeout
+func NewFuzzer(testFunction func(string) (string, error)) *Fuzzer <span class="cov0" title="0">{
+        return &amp;Fuzzer{
+                testFunction: testFunction,
+                timeout:      3 * time.Second, // 3-second timeout
+        }
+}</span>
+
+// randomString generates a random string of a given length
+func (f *Fuzzer) randomString(length int) string <span class="cov0" title="0">{
+        letters := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        s := make([]byte, length)
+        for i := range s </span><span class="cov0" title="0">{
+                s[i] = letters[rand.Intn(len(letters))]
+        }</span>
+        <span class="cov0" title="0">return string(s)</span>
+}
+
+// Fuzz generates random inputs, tests the function with a timeout, and returns the result and any error
+func (f *Fuzzer) Fuzz() (string, error) <span class="cov0" title="0">{
+        input := f.randomString(rand.Intn(20) + 1) // Generate a random string of length 1 to 20
+        resultChan := make(chan string)
+        errorChan := make(chan error)
+
+        // Run the test function in a separate goroutine
+        go func() </span><span class="cov0" title="0">{
+                result, err := f.testFunction(input) // Call the function being fuzzed
+                if err != nil </span><span class="cov0" title="0">{
+                        errorChan &lt;- err
+                }</span> else<span class="cov0" title="0"> {
+                        resultChan &lt;- result
+                }</span>
+        }()
+
+        // Use select to handle either a result, an error, or a timeout
+        <span class="cov0" title="0">select </span>{
+        case result := &lt;-resultChan:<span class="cov0" title="0">
+                fmt.Printf("Success with input '%s': %s\n", input, result)
+                return result, nil</span>
+        case err := &lt;-errorChan:<span class="cov0" title="0">
+                fmt.Printf("Error with input '%s': %v\n", input, err)
+                return "", err</span>
+        case &lt;-time.After(f.timeout):<span class="cov0" title="0">
+                fmt.Printf("Test timed out after %v seconds for input: %s\n", f.timeout.Seconds(), input)
+                return "", errors.New("test timed out")</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package main
+
+import (
+        "fmt"
+        "log"
+
+        "github.com/google/go-tpm/tpm2"
+        "github.com/google/go-tpm/tpm2/transport/simulator"
+)
+
+func main() <span class="cov0" title="0">{
+        // Open the TPM simulator
+        tpm, err := simulator.OpenSimulator()
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Could not connect to TPM simulator: %v", err)
+        }</span>
+        <span class="cov0" title="0">defer tpm.Close()
+
+        // Request 16 random bytes from the TPM
+        grc := tpm2.GetRandom{
+                BytesRequested: 16,
+        }
+
+        // Execute the command and retrieve the bytes
+        randomBytes, err := grc.Execute(tpm)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("GetRandom failed: %v", err)
+        }</span>
+
+        // Print the random bytes as a hex string
+        <span class="cov0" title="0">fmt.Printf("Random Bytes: %x\n", randomBytes)</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package main
+
+import (
+        "errors"
+        "fmt"
+        "math/rand"
+        "time"
+)
+
+// processString processes the input string and returns an error if the string is too long
+func processString(input string) (string, error) <span class="cov0" title="0">{
+        // simulate varying times of function
+        delay := rand.Intn(6) // Random delay between 0 and 5 seconds
+        time.Sleep(time.Duration(delay) * time.Second)
+
+        // Strings longer than 10 characters are invalid
+        if len(input) &gt; 10 </span><span class="cov0" title="0">{
+                return "", errors.New("input string is too long")
+        }</span>
+
+        // If the string is valid and processing completes in time, return the processed result
+        <span class="cov0" title="0">return fmt.Sprintf("Processed: %s", input), nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

@@ -48,6 +48,13 @@ jobs:
         mkdir -p reports  # Ensure the reports directory exists
         go test -v -run '^TestFuzzer$' -args -start=${{ matrix.range.start }} -end=${{ matrix.range.end }} > reports/report-${{ matrix.range.start }}-to-${{ matrix.range.end }}.txt
 
+    # New Step 3.5: Run Go Native Fuzz Test
+    - name: Run Go Native Fuzz Test
+      run: |
+        mkdir -p reports  # Ensure the reports directory exists
+        go test -fuzz=FuzzProcessString -fuzztime=5m > reports/go_native_fuzz_report_${{ matrix.range.start }}-${{ matrix.range.end }}.txt
+
+
     # Step 4: Upload the report as an artifact
     - name: Upload Fuzz Test Report
       if: always()  # Ensure this step runs even if tests fail
@@ -55,6 +62,15 @@ jobs:
       with:
         name: test-report-${{ matrix.range.start }}-to-${{ matrix.range.end }}
         path: reports/report-${{ matrix.range.start }}-to-${{ matrix.range.end }}.txt
+    
+    # New Step 4.5: Upload Go Native Fuzz Test Report
+    - name: Upload Go Native Fuzz Test Report
+      if: always()  # Ensure this step runs even if tests fail
+      uses: actions/upload-artifact@v4
+      with:
+        name: go-native-fuzz-report-${{ matrix.range.start }}-to-${{ matrix.range.end }}
+        path: reports/go_native_fuzz_report_${{ matrix.range.start }}-${{ matrix.range.end }}.txt
+
 
   # Separate job for the fixed input test
   test-fixed-input:

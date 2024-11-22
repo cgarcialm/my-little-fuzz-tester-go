@@ -1,0 +1,21 @@
+mode: set
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:17.67,22.2 1 0
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:25.50,28.19 3 0
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:28.19,30.3 1 0
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:31.2,31.18 1 0
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:35.41,41.12 4 0
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:41.12,43.17 2 0
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:43.17,45.4 1 0
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:45.9,47.4 1 0
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:51.2,51.9 1 0
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:52.30,54.21 2 0
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:55.26,57.17 2 0
+github.com/cgarcialm/my-little-fuzz-tester-go/fuzzer.go:58.31,60.42 2 0
+github.com/cgarcialm/my-little-fuzz-tester-go/main.go:11.13,14.16 2 0
+github.com/cgarcialm/my-little-fuzz-tester-go/main.go:14.16,16.3 1 0
+github.com/cgarcialm/my-little-fuzz-tester-go/main.go:17.2,26.16 4 0
+github.com/cgarcialm/my-little-fuzz-tester-go/main.go:26.16,28.3 1 0
+github.com/cgarcialm/my-little-fuzz-tester-go/main.go:31.2,31.47 1 0
+github.com/cgarcialm/my-little-fuzz-tester-go/string_processor.go:11.50,17.21 3 0
+github.com/cgarcialm/my-little-fuzz-tester-go/string_processor.go:17.21,19.3 1 0
+github.com/cgarcialm/my-little-fuzz-tester-go/string_processor.go:22.2,22.49 1 0
