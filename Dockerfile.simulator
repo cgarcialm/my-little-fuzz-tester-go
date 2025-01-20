@@ -24,4 +24,5 @@ RUN ./bootstrap && ./configure && make
 EXPOSE 2321
 
 # Run the TPM simulator when the container starts
-ENTRYPOINT ["./Simulator/src/tpm2-simulator"]
+# ENTRYPOINT ["./Simulator/src/tpm2-simulator"]
+ENTRYPOINT ["/bin/sh"]
