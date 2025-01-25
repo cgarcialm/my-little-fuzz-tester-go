@@ -19,10 +19,10 @@ COPY . .
 RUN go mod tidy
 
 # Build the Go program into a binary
-RUN go build -o go-tpm-client main.go
+RUN go build -o go-tpm-client main.go tpm_tcp_library.go tpm_tcp_protocol.go
 
 # Expose the TPM simulator port (optional if you're running the simulator inside the container)
-EXPOSE 2321
+EXPOSE 2321 2322
 
 # Run the compiled binary by default
 CMD ["./go-tpm-client"]
