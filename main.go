@@ -2,75 +2,89 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"os"
-	"time"
+
+	// "time"
+
+	. "github.com/google/go-tpm/tpm2"
 )
 
-// TPM represents a connection to a TPM simulator.
-type TPM struct {
-	transport *net.TCPConn
-}
+// // Send implements the TPM interface.
+// func (t *TPM) Send(input []byte) ([]byte, error) {
+// 	fmt.Println("Sending bytes to TPM.")
+// 	_, err := t.transport.Write(input)
+// 	if err != nil {
+// 		fmt.Println("Write to server failed:", err.Error())
+// 		return nil, err
+// 	}
 
-// Send implements the TPM interface.
-func (t *TPM) Send(input []byte) ([]byte, error) {
-	fmt.Println("Sending bytes to TPM.")
-	_, err := t.transport.Write(input)
-	if err != nil {
-		fmt.Println("Write to server failed:", err.Error())
-		return nil, err
-	}
+// 	reply := make([]byte, 1024)
 
-	reply := make([]byte, 1024)
+// 	// Set a timeout for the write and read operations
+// 	timeout := 5 * time.Second // Adjust the timeout duration as needed
 
-	// Set a timeout for the write and read operations
-	timeout := 5 * time.Second // Adjust the timeout duration as needed
+// 	// Set the deadline for reading
+// 	err = t.transport.SetReadDeadline(time.Now().Add(timeout))
+// 	if err != nil {
+// 		fmt.Println("SetReadDeadline failed:", err.Error())
+// 		return nil, err
+// 	}
 
-	// Set the deadline for reading
-	err = t.transport.SetReadDeadline(time.Now().Add(timeout))
-	if err != nil {
-		fmt.Println("SetReadDeadline failed:", err.Error())
-		return nil, err
-	}
+// 	fmt.Println("Reading response from TPM.")
+// 	n, err := t.transport.Read(reply)
+// 	if err != nil {
+// 		fmt.Println("Read from server failed:", err.Error())
+// 		return nil, err
+// 	}
 
-	fmt.Println("Reading response from TPM.")
-	n, err := t.transport.Read(reply)
-	if err != nil {
-		fmt.Println("Read from server failed:", err.Error())
-		return nil, err
-	}
+// 	// // Check how much data was actually read
+// 	fmt.Printf("Read %d bytes\n", n)
 
-	// // Check how much data was actually read
-	fmt.Printf("Read %d bytes\n", n)
-
-	return reply, nil
-}
-
-// Close implements the TPM interface.
-func (t *TPM) Close() error {
-	return t.transport.Close()
-}
+// 	return reply, nil
+// }
 
 func main() {
 	var err error
-	servAddr := "tpm-simulator:2321"
-	tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
+	commandAddr := "tpm-simulator:2321"
+	platformAddr := "tpm-simulator:2322"
+	tpmTcpClient, err := CreateTPMTcpClient(commandAddr, platformAddr)
 	if err != nil {
-		fmt.Println("ResolveTCPAddr failed:", err.Error())
+		fmt.Printf("Failed to create TPMTcpClient: %v\n", err.Error())
+		os.Exit(1)
+	}
+	defer tpmTcpClient.Close()
+
+	if err = tpmTcpClient.SetUpTpm(); err != nil {
+		fmt.Printf("Failed to set up the TPM: %v\n", err.Error())
 		os.Exit(1)
 	}
 
-	conn, err := net.DialTCP("tcp", nil, tcpAddr)
-	if err != nil {
-		fmt.Println("Dial failed:", err.Error())
-		os.Exit(1)
-	}
+	fmt.Println("TPM setup succeeded.")
 
 	// var thetpm transport.TPMCloser
-	thetpm := &TPM{
-		transport: conn,
+	thetpm := tpmTcpClient.GetTPM()
+	// We don't need to call thetpm.Close() because we are calling from the tpmTcpClient
+	// defer thetpm.Close()
+
+	sc := Startup{
+		StartupType: TPMSUClear,
 	}
-	defer thetpm.Close()
+	if _, err = sc.Execute(thetpm); err != nil {
+		fmt.Printf("Startup failed: %v\n", err.Error())
+		os.Exit(1)
+	}
+	fmt.Printf("Startup succeeded.\n")
+
+	grc := GetRandom{
+		BytesRequested: 16,
+	}
+
+	var grc_out *GetRandomResponse
+	if grc_out, err = grc.Execute(thetpm); err != nil {
+		fmt.Printf("GetRandom failed: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("GetRandom output: %x\n", grc_out.RandomBytes)
 
 	var output []byte
 	var message []byte
