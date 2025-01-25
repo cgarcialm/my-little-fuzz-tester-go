@@ -21,7 +21,7 @@ WORKDIR /tpm/TPMCmd
 RUN ./bootstrap && ./configure && make
 
 # Expose the port for the simulator (default: 2321)
-EXPOSE 2321
+EXPOSE 2321 2322
 
 # Run the TPM simulator when the container starts
 # ENTRYPOINT ["./Simulator/src/tpm2-simulator"]
